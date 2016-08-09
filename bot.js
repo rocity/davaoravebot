@@ -32,7 +32,7 @@ retweeter = function () {
   messagelogs_list = jsonfile.readFileSync(logs);
   var msgs = messagelogs_list;
 
-  msgs.push(timestamp('Started running retweeter()'));
+  timestamp('Started running retweeter()');
   eachAsync(hashtag_list.hashtags, (hashtag, index, done) => {
     var q_tag = hashtag.tag,
         q_since = '',
@@ -56,7 +56,7 @@ retweeter = function () {
         var newfile = 'saves/' + q_tag + '_' + moment().format('MMMM_Do_YYYY_h_mm_ss_a') + '.json';
 
         // create new log message
-        msgs.push(timestamp('Write file executed for ' + newfile));
+        timestamp('Write file executed for ' + newfile);
 
         // create tweet data file
         jsonfile.writeFile(newfile, data, function (err) {});
@@ -66,7 +66,7 @@ retweeter = function () {
 
         // execute an RT for the last tweet
         T.post('statuses/retweet/:id', { id: lasttweet.id_str }, function (err, data, response) {
-          msgs.push(timestamp('Retweeted ' + lasttweet.id_str));
+          timestamp('Retweeted ' + lasttweet.id_str);
         })
 
         // write message log at end of file
@@ -75,15 +75,15 @@ retweeter = function () {
       } else {
         // there are no tweets yet.
         var msgs = messagelogs_list;
-        msgs.push(timestamp('No tweets yet.'));
+        timestamp('No tweets yet.');
       }
     })
   }, error => {
     console.log('Finished all processes.')
-    msgs.push(timestamp('Finished all processes.'));
+    timestamp('Finished all processes.');
   })
 
-  msgs.push(timestamp('End of retweeter()'));
+  timestamp('End of retweeter()');
   jsonfile.writeFileSync(logs, msgs);
 }
 
