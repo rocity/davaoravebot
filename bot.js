@@ -103,6 +103,7 @@ retweeterRun = function() {
 
 setInterval(function() {
   try {
+    console.log('Running retweeter at ' + moment().format());
     retweeterRun();
   }
   catch (e) {
