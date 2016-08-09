@@ -43,15 +43,16 @@
         <script src="http://code.jquery.com/jquery-1.x-git.min.js"></script>
         <script>
         $(function() {
-            var logs = [];
-
             $.getJSON('logs.json', function (data) {
                 $('#logs tbody').html('');
                 if (typeof data === 'array') {
                     var data = data.reverse();
                 }
                 $.each(data, function (i, log) {
-                    var row = '<tr><td>'+log+'</td></tr>';
+                    newlog = log.replace(/\[(.*)\]/, function(match, pattern1) {
+                      return '<small>' + pattern1 + '</small>';
+                    });
+                    var row = '<tr><td>'+newlog+'</td></tr>';
                     $(row).appendTo('#logs tbody');
                 })
             })
