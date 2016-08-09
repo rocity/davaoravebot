@@ -3,7 +3,6 @@ var jsonfile = require('jsonfile');
 var _ = require('underscore');
 var moment = require('moment');
 var Twit = require('twit');
-require('dotenv').config()
 
 var T = new Twit({
   consumer_key:         process.env.DRB_TWIT_CONSUMER_KEY,
