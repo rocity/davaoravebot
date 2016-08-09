@@ -90,23 +90,23 @@ tweeter = function () {
 
 }
 
-retweeter();
+// retweeter();
 
 // set intervals
-// retweeterRun = function() {
-//   async.waterfall([
-//     retweeter
-//   ],
-//   function(err, botData) {
+retweeterRun = function() {
+  async.waterfall([
+    retweeter
+  ],
+  function(err, botData) {
 
-//   });
-// };
+  });
+};
 
-// setInterval(function() {
-//   try {
-//     retweeterRun();
-//   }
-//   catch (e) {
-//     console.log(e);
-//   }
-// }, 60000 * 10); // run every 10 minutes
+setInterval(function() {
+  try {
+    retweeterRun();
+  }
+  catch (e) {
+    console.log(e);
+  }
+}, 60000 * 10); // run every 10 minutes
