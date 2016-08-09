@@ -1,3 +1,5 @@
+![alttext](https://github.com/rocity/davaoravebot/blob/master/rdsmall.png "Logo")
+
 # davaoravebot
 [@davaoravebot](https://twitter.com/davaoravebot)
 
