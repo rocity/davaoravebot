@@ -1,6 +1,9 @@
 const eachAsync = require('each-async');
 var jsonfile = require('jsonfile');
 var _ = require('underscore');
+var moment = require('moment');
+var Twit = require('twit');
+require('dotenv').config()
 
 var T = new Twit({
   consumer_key:         process.env.DRB_TWIT_CONSUMER_KEY,
@@ -33,6 +36,11 @@ eachAsync(hashtag_list.hashtags, (hashtag, index, done) => {
   T.get('search/tweets', { q: search_query, count: q_count }, function(err, data, response) {
     if (data) {
       done();
+
+      var newfile = 'saves/' + q_tag + '_' + moment().format('MMMM_Do_YYYY_h_mm_ss_a') + '.json';
+      jsonfile.writeFile(newfile, data, function (err) {
+        console.error(err)
+      })
     }
   })
 }, error => {
