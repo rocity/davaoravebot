@@ -14,11 +14,13 @@ var T = new Twit({
 })
 
 var hashtags = 'hashtags.json';
+var logs = 'logs.json';
 
 var hashtag_list = undefined;
 
 // get hashtag list
-hashtag_list = jsonfile.readFileSync(hashtags)
+hashtag_list = jsonfile.readFileSync(hashtags);
+messagelogs_list = jsonfile.readFileSync(logs);
 
 eachAsync(hashtag_list.hashtags, (hashtag, index, done) => {
   var q_tag = hashtag.tag,
@@ -35,14 +37,27 @@ eachAsync(hashtag_list.hashtags, (hashtag, index, done) => {
   var search_query = q_tag + ' since:' + q_since;
   T.get('search/tweets', { q: search_query, count: q_count }, function(err, data, response) {
     if (data) {
-      done();
 
+      var lasttweet = _.last(data.statuses);
+
+      // LOGGING
       var newfile = 'saves/' + q_tag + '_' + moment().format('MMMM_Do_YYYY_h_mm_ss_a') + '.json';
-      jsonfile.writeFile(newfile, data, function (err) {
-        console.error(err)
-      })
+
+      // create new logo message
+      var msgs = messagelogs_list;
+      msgs.push('Write file executed for ' + newfile);
+      jsonfile.writeFileSync(logs, msgs);
+
+      // create tweet data file
+      jsonfile.writeFile(newfile, data, function (err) {});
+      // END OF LOGGING
+
+      // execute POST commands here
+
+
+      done();
     }
   })
 }, error => {
-  console.log('error, finished.')
+  console.log('Finished all processes.')
 })
