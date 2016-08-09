@@ -3,6 +3,7 @@ var jsonfile = require('jsonfile');
 var _ = require('underscore');
 var moment = require('moment');
 var Twit = require('twit');
+// require('dotenv').config();
 
 var T = new Twit({
   consumer_key:         process.env.DRB_TWIT_CONSUMER_KEY,
@@ -21,6 +22,7 @@ var hashtag_list = undefined;
 
 // returns a string (intented for use on logs)
 function timestamp(msg) {
+  console.log('[' + moment().format(timeformat) +'] ' + msg);
   return '[' + moment().format(timeformat) +'] ' + msg;
 }
 
@@ -89,7 +91,7 @@ tweeter = function () {
 
 }
 
-// retweeter();
+retweeter();
 
 // set intervals
 retweeterRun = function() {
