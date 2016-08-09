@@ -16,13 +16,22 @@ var T = new Twit({
 var hashtags = 'hashtags.json';
 var logs = 'logs.json';
 
+var timeformat = 'YYYY.MM.DD HH:mm:ss';
+
 var hashtag_list = undefined;
+
+// returns a string (intented for use on logs)
+function timestamp(msg) {
+  return '[' + moment().format(timeformat) +'] ' + msg;
+}
 
 retweeter = function () {
   // get hashtag list
   hashtag_list = jsonfile.readFileSync(hashtags);
   messagelogs_list = jsonfile.readFileSync(logs);
+  var msgs = messagelogs_list;
 
+  msgs.push(timestamp('Started running retweeter()'));
   eachAsync(hashtag_list.hashtags, (hashtag, index, done) => {
     var q_tag = hashtag.tag,
         q_since = '',
@@ -46,8 +55,7 @@ retweeter = function () {
         var newfile = 'saves/' + q_tag + '_' + moment().format('MMMM_Do_YYYY_h_mm_ss_a') + '.json';
 
         // create new log message
-        var msgs = messagelogs_list;
-        msgs.push('Write file executed for ' + newfile);
+        msgs.push(timestamp('Write file executed for ' + newfile));
 
         // create tweet data file
         jsonfile.writeFile(newfile, data, function (err) {});
@@ -57,7 +65,7 @@ retweeter = function () {
 
         // execute an RT for the last tweet
         T.post('statuses/retweet/:id', { id: lasttweet.id_str }, function (err, data, response) {
-          msgs.push('Retweeted ' + lasttweet.id_str + ' - Timestamp: ' + moment().format());
+          msgs.push(timestamp('Retweeted ' + lasttweet.id_str));
         })
 
         // write message log at end of file
@@ -66,34 +74,39 @@ retweeter = function () {
       } else {
         // there are no tweets yet.
         var msgs = messagelogs_list;
-        msgs.push('No tweets yet. - Logged at ' + moment().format());
-        jsonfile.writeFileSync(logs, msgs);
+        msgs.push(timestamp('No tweets yet.'));
       }
     })
   }, error => {
     console.log('Finished all processes.')
+    msgs.push(timestamp('Finished all processes.'));
   })
+
+  msgs.push(timestamp('End of retweeter()'));
+  jsonfile.writeFileSync(logs, msgs);
 }
 
 tweeter = function () {
 
 }
 
+retweeter();
+
 // set intervals
-retweeterRun = function() {
-  async.waterfall([
-    retweeter
-  ],
-  function(err, botData) {
+// retweeterRun = function() {
+//   async.waterfall([
+//     retweeter
+//   ],
+//   function(err, botData) {
 
-  });
-};
+//   });
+// };
 
-setInterval(function() {
-  try {
-    retweeterRun();
-  }
-  catch (e) {
-    console.log(e);
-  }
-}, 60000 * 10); // run every 3 minutes
+// setInterval(function() {
+//   try {
+//     retweeterRun();
+//   }
+//   catch (e) {
+//     console.log(e);
+//   }
+// }, 60000 * 10); // run every 10 minutes
