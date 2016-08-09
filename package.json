@@ -1,0 +1,22 @@
+{
+  "name": "davaoravebot",
+  "version": "0.0.1",
+  "description": "A bot for the Davao Rave events",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "davao rave bot"
+  ],
+  "author": "Kevin Kalis",
+  "license": "MIT",
+  "dependencies": {
+    "async": "^2.0.1",
+    "dotenv": "^2.0.0",
+    "each-async": "^1.1.1",
+    "jsonfile": "^2.3.1",
+    "twit": "^2.2.4",
+    "underscore": "^1.8.3"
+  }
+}

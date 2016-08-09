@@ -1,6 +1,12 @@
 {
   "hashtags": [
-    "#HomeAlone",
-    "#foo"
+    {
+      "tag": "#HomeAlone",
+      "last_date": "2016-08-09"
+    },
+    {
+      "tag": "#ti6",
+      "last_date": "2016-08-09"
+    }
   ]
 }
