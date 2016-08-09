@@ -59,7 +59,9 @@ retweeter = function () {
         timestamp('Write file executed for ' + newfile);
 
         // create tweet data file
-        jsonfile.writeFile(newfile, data, function (err) {});
+        // README: remove this to not overpopulate the heroku repo
+        // jsonfile.writeFile(newfile, data, function (err) {});
+
         // END OF LOGGING
 
         // execute POST commands here
@@ -84,7 +86,8 @@ retweeter = function () {
   })
 
   timestamp('End of retweeter()');
-  jsonfile.writeFileSync(logs, msgs);
+  // README: remove this to not overpopulate the heroku repo
+  // jsonfile.writeFileSync(logs, msgs);
 }
 
 tweeter = function () {
