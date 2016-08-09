@@ -51,6 +51,7 @@ retweeter = function () {
       if (data.statuses.length) {
 
         var lasttweet = _.last(data.statuses);
+        var firsttweet = _.first(data.statuses);
 
         // LOGGING
         var newfile = 'saves/' + q_tag + '_' + moment().format('MMMM_Do_YYYY_h_mm_ss_a') + '.json';
@@ -67,9 +68,17 @@ retweeter = function () {
         // execute POST commands here
 
         // execute an RT for the last tweet
-        T.post('statuses/retweet/:id', { id: lasttweet.id_str }, function (err, data, response) {
-          timestamp('Retweeted ' + lasttweet.id_str);
-        })
+        if (lasttweet.retweeted) {
+          timestamp('This tweet has already been retweeted. Pick another one.');
+          T.post('statuses/retweet/:id', { id: firsttweet.id_str }, function (err, data, response) {
+            timestamp('Retweeted ' + firsttweet.id_str);
+          });
+        } else {
+          timestamp('This tweet is not yet retweeted. Sending RT request.');
+          T.post('statuses/retweet/:id', { id: lasttweet.id_str }, function (err, data, response) {
+            timestamp('Retweeted ' + lasttweet.id_str);
+          });
+        }
 
         // write message log at end of file
         jsonfile.writeFileSync(logs, msgs);
