@@ -74,6 +74,8 @@ retweeter = function () {
     var search_query = q_tag + ' since:' + q_since;
     T.get('search/tweets', { q: search_query, count: q_count }, function(err, data, response) {
 
+      post_log('Query: ' + q_tag);
+
       if (data.statuses.length) {
 
         // cache indexes
