@@ -15,25 +15,50 @@ var T = new Twit({
 })
 
 var hashtags = 'hashtags.json';
-// var logs = 'logs.json';
 
 var timeformat = 'YYYY.MM.DD HH:mm:ss';
 
-var hashtag_list = undefined;
+var querystring = require('querystring');
+var http = require('http');
+var fs = require('fs');
 
-// returns a string (intented for use on logs)
-function timestamp(msg) {
-  console.log('[' + moment().format(timeformat) +'] ' + msg);
-  return '[' + moment().format(timeformat) +'] ' + msg;
+function post_log(logstring) {
+  console.log(logstring)
+  // Build the post string from an object
+  var post_data = querystring.stringify({
+      'logmsg' : logstring,
+  });
+
+  // An object of options to indicate where to post to
+  var post_options = {
+      host: process.env.DRB_LOG_POST_HOST,
+      port: '80',
+      path: process.env.DRB_LOG_POST_FILE,
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': Buffer.byteLength(post_data)
+      }
+  };
+
+  // Set up the request
+  var post_req = http.request(post_options, function(res) {
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+          // console.log('Response: ' + chunk);
+      });
+  });
+
+  // post the data
+  post_req.write(post_data);
+  post_req.end();
 }
 
 retweeter = function () {
   // get hashtag list
   hashtag_list = jsonfile.readFileSync(hashtags);
-  // messagelogs_list = jsonfile.readFileSync(logs);
-  // var msgs = messagelogs_list;
 
-  timestamp('Started running retweeter()');
+  post_log('Started running retweeter()');
   eachAsync(hashtag_list.hashtags, (hashtag, index, done) => {
     var q_tag = hashtag.tag,
         q_since = '',
@@ -42,7 +67,7 @@ retweeter = function () {
       // use date here
       q_since = hashtag.last_id;
     } else {
-      q_since = hashtag.last_date;
+      q_since = moment().utcOffset('+0800').format('YYYY-MM-DD');
     }
 
     // execute tweet
@@ -51,60 +76,47 @@ retweeter = function () {
 
       if (data.statuses.length) {
 
-        var lasttweet = _.last(data.statuses);
-        var firsttweet = _.first(data.statuses);
+        // cache indexes
+        var cache = _.map(new Array(data.statuses.length + 1).join(), function (item, index) {
+          return index;
+        });
 
-        // LOGGING
-        var newfile = 'saves/' + q_tag + '_' + moment().format('MMMM_Do_YYYY_h_mm_ss_a') + '.json';
-
-        // create new log message
-        timestamp('Write file executed for ' + newfile);
-
-        // create tweet data file
-        // README: remove this to not overpopulate the heroku repo
-        // jsonfile.writeFile(newfile, data, function (err) {});
-
+        // get random from cached array
+        var rand = _.random(0, cache.length);
         // END OF LOGGING
 
         // execute POST commands here
 
-        // execute an RT for the last tweet
-        if (lasttweet.retweeted === false) {
-          timestamp('This tweet has already been retweeted. Pick another one. TID: ' + lasttweet.id_str);
-          T.post('statuses/retweet/:id', { id: firsttweet.id_str }, function (err, data, response) {
-            timestamp('Retweeted ' + firsttweet.id_str);
+        // pluck a random tweet to be retweeted.
+        if (typeof data.statuses[rand] !== 'undefined') {
+          var selected_tweet = data.statuses[rand];
+          T.post('statuses/retweet/:id', { id: selected_tweet.id_str }, function (err, data, response) {
+            post_log('Attempted retweet for ' + selected_tweet.id_str);
+            post_log(selected_tweet.id_str + ' Response: ' +err);
           });
         } else {
-          timestamp('This tweet is not yet retweeted. Sending RT request.');
-          T.post('statuses/retweet/:id', { id: lasttweet.id_str }, function (err, data, response) {
-            timestamp('Retweeted ' + lasttweet.id_str);
-          });
+          post_log('Selected an undefined tweet')
         }
 
-        // write message log at end of file
-        // jsonfile.writeFileSync(logs, msgs);
         done();
       } else {
         // there are no tweets yet.
-        // var msgs = messagelogs_list;
-        timestamp('No tweets yet.');
+        post_log('No tweets yet.');
       }
     })
   }, error => {
     console.log('Finished all processes.')
-    timestamp('Finished all processes.');
+    post_log('Finished all processes.');
   })
 
-  timestamp('End of retweeter()');
-  // README: remove this to not overpopulate the heroku repo
-  // jsonfile.writeFileSync(logs, msgs);
+  post_log('End of retweeter()');
 }
 
 tweeter = function () {
 
 }
 
-// retweeter();
+retweeter();
 
 // set intervals
 retweeterRun = function() {
