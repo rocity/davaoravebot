@@ -3,6 +3,7 @@ var jsonfile = require('jsonfile');
 var _ = require('underscore');
 var moment = require('moment');
 var Twit = require('twit');
+var async       = require('async');
 // require('dotenv').config();
 
 var T = new Twit({
@@ -68,7 +69,7 @@ retweeter = function () {
         // execute POST commands here
 
         // execute an RT for the last tweet
-        if (lasttweet.retweeted) {
+        if (lasttweet.retweeted === false) {
           timestamp('This tweet has already been retweeted. Pick another one.');
           T.post('statuses/retweet/:id', { id: firsttweet.id_str }, function (err, data, response) {
             timestamp('Retweeted ' + firsttweet.id_str);
@@ -103,7 +104,7 @@ tweeter = function () {
 
 }
 
-retweeter();
+// retweeter();
 
 // set intervals
 retweeterRun = function() {
