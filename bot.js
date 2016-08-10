@@ -15,7 +15,7 @@ var T = new Twit({
 })
 
 var hashtags = 'hashtags.json';
-var logs = 'logs.json';
+// var logs = 'logs.json';
 
 var timeformat = 'YYYY.MM.DD HH:mm:ss';
 
@@ -30,8 +30,8 @@ function timestamp(msg) {
 retweeter = function () {
   // get hashtag list
   hashtag_list = jsonfile.readFileSync(hashtags);
-  messagelogs_list = jsonfile.readFileSync(logs);
-  var msgs = messagelogs_list;
+  // messagelogs_list = jsonfile.readFileSync(logs);
+  // var msgs = messagelogs_list;
 
   timestamp('Started running retweeter()');
   eachAsync(hashtag_list.hashtags, (hashtag, index, done) => {
@@ -86,7 +86,7 @@ retweeter = function () {
         done();
       } else {
         // there are no tweets yet.
-        var msgs = messagelogs_list;
+        // var msgs = messagelogs_list;
         timestamp('No tweets yet.');
       }
     })
