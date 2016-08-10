@@ -70,7 +70,7 @@ retweeter = function () {
 
         // execute an RT for the last tweet
         if (lasttweet.retweeted === false) {
-          timestamp('This tweet has already been retweeted. Pick another one.');
+          timestamp('This tweet has already been retweeted. Pick another one. TID: ' + lasttweet.id_str);
           T.post('statuses/retweet/:id', { id: firsttweet.id_str }, function (err, data, response) {
             timestamp('Retweeted ' + firsttweet.id_str);
           });
@@ -124,4 +124,4 @@ setInterval(function() {
   catch (e) {
     console.log(e);
   }
-}, 60000 * 1); // run every 10 minutes
+}, 60000 * 10); // run every 10 minutes
