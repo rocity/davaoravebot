@@ -82,7 +82,7 @@ retweeter = function () {
         }
 
         // write message log at end of file
-        jsonfile.writeFileSync(logs, msgs);
+        // jsonfile.writeFileSync(logs, msgs);
         done();
       } else {
         // there are no tweets yet.
@@ -124,4 +124,4 @@ setInterval(function() {
   catch (e) {
     console.log(e);
   }
-}, 60000 * 10); // run every 10 minutes
+}, 60000 * 1); // run every 10 minutes
