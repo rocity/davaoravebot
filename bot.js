@@ -54,6 +54,53 @@ function post_log(logstring) {
   post_req.end();
 }
 
+/*
+Send a Tweet
+*/
+var failcount = 0;
+var last_quote = 'lq.json';
+var last_quote_stream = jsonfile.readFileSync(last_quote);
+
+var quote_list = [
+  'Hello world',
+  'Some non-creative quote',
+  'I have no idea.',
+  'Newest questions.'
+]
+
+function select_quote() {
+  var sel_quote_index = _.random(0, (quote_list.length - 1));
+  return quote_list[sel_quote_index];
+}
+
+function tweet_quote() {
+
+  var sel_quote = select_quote();
+  var lqstr = last_quote_stream.quote;
+
+  if (lqstr === sel_quote) {
+    failcount = failcount + 1;
+    tweet_quote();
+  } else {
+    // TODO: Replace console.logs with post_log()
+    console.log('Selection success. Failed ' + failcount + ' times.')
+
+    T.post('statuses/update', { status: sel_quote }, function(err, data, response) {
+      console.log('Attempted tweet: ' + sel_quote + ' / Twitter Response: ' + JSON.stringify(data))
+      var newquote = {quote: sel_quote}
+      jsonfile.writeFileSync(last_quote, newquote)
+    })
+    failcount = 0;
+  }
+
+
+  return true;
+}
+/*
+End send a Tweet
+*/
+
+
 retweeter = function () {
   // get hashtag list
   hashtag_list = jsonfile.readFileSync(hashtags);
