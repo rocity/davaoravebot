@@ -22,11 +22,12 @@ var querystring = require('querystring');
 var http = require('http');
 var fs = require('fs');
 
-function post_log(logstring) {
+function post_log(logstring, type) {
   console.log(logstring)
   // Build the post string from an object
   var post_data = querystring.stringify({
       'logmsg' : logstring,
+      'type': type
   });
 
   // An object of options to indicate where to post to
@@ -82,11 +83,10 @@ function tweet_quote() {
     failcount = failcount + 1;
     tweet_quote();
   } else {
-    // TODO: Replace console.logs with post_log()
-    console.log('Selection success. Failed ' + failcount + ' times.')
+    post_log('Selection success. Failed ' + failcount + ' times.', 2)
 
     T.post('statuses/update', { status: sel_quote }, function(err, data, response) {
-      console.log('Attempted tweet: ' + sel_quote + ' / Twitter Response: ' + JSON.stringify(data))
+      post_log('Attempted tweet: ' + sel_quote + ' / Twitter Response: ' + JSON.stringify(data), 2)
       var newquote = {quote: sel_quote}
       jsonfile.writeFileSync(last_quote, newquote)
     })
@@ -105,7 +105,7 @@ retweeter = function () {
   // get hashtag list
   hashtag_list = jsonfile.readFileSync(hashtags);
 
-  post_log('Started running retweeter()');
+  post_log('Started running retweeter()', 1);
   eachAsync(hashtag_list.hashtags, (hashtag, index, done) => {
     var q_tag = hashtag.tag,
         q_since = '',
@@ -121,7 +121,7 @@ retweeter = function () {
     var search_query = q_tag + ' since:' + q_since;
     T.get('search/tweets', { q: search_query, count: q_count }, function(err, data, response) {
 
-      post_log('Query: ' + q_tag);
+      post_log('Query: ' + q_tag, 1);
 
       if (data.statuses.length) {
 
@@ -140,25 +140,25 @@ retweeter = function () {
         if (typeof data.statuses[rand] !== 'undefined') {
           var selected_tweet = data.statuses[rand];
           T.post('statuses/retweet/:id', { id: selected_tweet.id_str }, function (err, data, response) {
-            post_log('Attempted retweet for ' + selected_tweet.id_str);
-            post_log(selected_tweet.id_str + ' Response: ' +err);
+            post_log('Attempted retweet for ' + selected_tweet.id_str, 1);
+            post_log(selected_tweet.id_str + ' Response: ' +err, 1);
           });
         } else {
-          post_log('Selected an undefined tweet')
+          post_log('Selected an undefined tweet', 1);
         }
 
         done();
       } else {
         // there are no tweets yet.
-        post_log('No tweets yet.');
+        post_log('No tweets for '+q_tag+' yet.', 1);
       }
     })
   }, error => {
     console.log('Finished all processes.')
-    post_log('Finished all processes.');
+    post_log('Finished all processes.', 1);
   })
 
-  post_log('End of retweeter()');
+  post_log('End of retweeter()', 1);
 }
 
 tweeter = function () {
