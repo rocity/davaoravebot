@@ -73,7 +73,7 @@ var quote_array = [
 function select_quote() {
   quotefile_list = jsonfile.readFileSync(hashtags);
 
-  if (quotefile_list.quotes.length > 0) {
+  if (typeof quotefile_list.quotes !== "undefined" && quotefile_list.quotes.length > 0) {
     quote_list = quotefile_list.quotes;
   } else {
     quote_list = quote_array;
@@ -95,7 +95,8 @@ function tweet_quote() {
   } else {
     post_log('Selection success. Failed ' + failcount + ' times.', 2)
 
-    console.log(sel_quote);
+    var datex = moment().utcOffset('+0800').format('YYYY-MM-DD');
+    console.log(datex + " Q: " + sel_quote);
     // T.post('statuses/update', { status: sel_quote }, function(err, data, response) {
     //   post_log('Attempted tweet: ' + sel_quote + ' / Twitter Response: ' + JSON.stringify(data), 2)
     //   var newquote = {quote: sel_quote}
@@ -177,6 +178,7 @@ tweeter = function () {
 }
 
 retweeter();
+tweet_quote();
 
 // set intervals
 retweeterRun = function() {
@@ -217,4 +219,4 @@ setInterval(function() {
   catch (e) {
     console.log(e);
   }
-}, 60000 * 1); // run every 1 minutes
+}, 60000 * 30); // run every 1 minutes
