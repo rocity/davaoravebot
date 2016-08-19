@@ -4,7 +4,7 @@ var _ = require('underscore');
 var moment = require('moment');
 var Twit = require('twit');
 var async       = require('async');
-require('dotenv').config();
+// require('dotenv').config();
 
 var T = new Twit({
   consumer_key:         process.env.DRB_TWIT_CONSUMER_KEY,
@@ -87,6 +87,8 @@ function select_quote() {
 
 function tweet_quote() {
 
+  var datex = moment().utcOffset('+0800').format('YYYY-MM-DD');
+  
   var sel_quote = select_quote();
   var lqstr = last_quote_stream.quote;
 
@@ -95,14 +97,15 @@ function tweet_quote() {
     tweet_quote();
   } else {
     post_log('Selection success. Failed ' + failcount + ' times.', 2)
-
-    var datex = moment().utcOffset('+0800').format('YYYY-MM-DD');
     console.log(datex + " Q: " + sel_quote);
-    // T.post('statuses/update', { status: sel_quote }, function(err, data, response) {
-    //   post_log('Attempted tweet: ' + sel_quote + ' / Twitter Response: ' + JSON.stringify(data), 2)
-    //   var newquote = {quote: sel_quote}
-    //   jsonfile.writeFileSync(last_quote, newquote)
-    // })
+    if (datex === '2016-08-20') {
+      console.log("Attempting to tweet.");
+      T.post('statuses/update', { status: sel_quote }, function(err, data, response) {
+        post_log('Attempted tweet: ' + sel_quote + ' / Twitter Response: ' + JSON.stringify(data), 2)
+        var newquote = {quote: sel_quote}
+        jsonfile.writeFileSync(last_quote, newquote)
+      })
+    }
     failcount = 0;
   }
 
