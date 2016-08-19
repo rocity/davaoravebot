@@ -4,7 +4,7 @@ var _ = require('underscore');
 var moment = require('moment');
 var Twit = require('twit');
 var async       = require('async');
-// require('dotenv').config();
+require('dotenv').config();
 
 var T = new Twit({
   consumer_key:         process.env.DRB_TWIT_CONSUMER_KEY,
@@ -24,6 +24,7 @@ var http = require('http');
 var fs = require('fs');
 
 function post_log(logstring, type) {
+  return true;
   console.log(logstring)
   // Build the post string from an object
   var post_data = querystring.stringify({
@@ -71,7 +72,7 @@ var quote_array = [
 ]
 
 function select_quote() {
-  quotefile_list = jsonfile.readFileSync(hashtags);
+  quotefile_list = jsonfile.readFileSync(quotes);
 
   if (typeof quotefile_list.quotes !== "undefined" && quotefile_list.quotes.length > 0) {
     quote_list = quotefile_list.quotes;
@@ -177,18 +178,18 @@ tweeter = function () {
 
 }
 
-retweeter();
+// retweeter();
 tweet_quote();
 
-// set intervals
-retweeterRun = function() {
-  async.waterfall([
-    retweeter
-  ],
-  function(err, botData) {
+// // set intervals
+// retweeterRun = function() {
+//   async.waterfall([
+//     retweeter
+//   ],
+//   function(err, botData) {
 
-  });
-};
+//   });
+// };
 
 tweeterRun = function() {
   async.waterfall([
