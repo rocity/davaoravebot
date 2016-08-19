@@ -15,6 +15,7 @@ var T = new Twit({
 })
 
 var hashtags = 'hashtags.json';
+var quotes = 'quotes.json';
 
 var timeformat = 'YYYY.MM.DD HH:mm:ss';
 
@@ -62,7 +63,7 @@ var failcount = 0;
 var last_quote = 'lq.json';
 var last_quote_stream = jsonfile.readFileSync(last_quote);
 
-var quote_list = [
+var quote_array = [
   'Hello world',
   'Some non-creative quote',
   'I have no idea.',
@@ -70,7 +71,16 @@ var quote_list = [
 ]
 
 function select_quote() {
+  quotefile_list = jsonfile.readFileSync(hashtags);
+
+  if (quotefile_list.quotes.length > 0) {
+    quote_list = quotefile_list.quotes;
+  } else {
+    quote_list = quote_array;
+  }
+
   var sel_quote_index = _.random(0, (quote_list.length - 1));
+
   return quote_list[sel_quote_index];
 }
 
@@ -85,11 +95,12 @@ function tweet_quote() {
   } else {
     post_log('Selection success. Failed ' + failcount + ' times.', 2)
 
-    T.post('statuses/update', { status: sel_quote }, function(err, data, response) {
-      post_log('Attempted tweet: ' + sel_quote + ' / Twitter Response: ' + JSON.stringify(data), 2)
-      var newquote = {quote: sel_quote}
-      jsonfile.writeFileSync(last_quote, newquote)
-    })
+    console.log(sel_quote);
+    // T.post('statuses/update', { status: sel_quote }, function(err, data, response) {
+    //   post_log('Attempted tweet: ' + sel_quote + ' / Twitter Response: ' + JSON.stringify(data), 2)
+    //   var newquote = {quote: sel_quote}
+    //   jsonfile.writeFileSync(last_quote, newquote)
+    // })
     failcount = 0;
   }
 
@@ -106,7 +117,7 @@ retweeter = function () {
   hashtag_list = jsonfile.readFileSync(hashtags);
 
   post_log('Started running retweeter()', 1);
-  eachAsync(hashtag_list.hashtags, (hashtag, index, done) => {
+  eachAsync(hashtag_list.hashtags, function(hashtag, index, done) {
     var q_tag = hashtag.tag,
         q_since = '',
         q_count = 10;
@@ -177,6 +188,16 @@ retweeterRun = function() {
   });
 };
 
+tweeterRun = function() {
+  async.waterfall([
+    tweet_quote
+  ],
+  function(err, botData) {
+
+  });
+};
+
+// Retweet tweets with hashtag x
 setInterval(function() {
   try {
     console.log('Running retweeter at ' + moment().format());
@@ -186,3 +207,14 @@ setInterval(function() {
     console.log(e);
   }
 }, 60000 * 10); // run every 10 minutes
+
+// Tweet out random quotes
+setInterval(function() {
+  try {
+    console.log('Running tweeter at ' + moment().format());
+    tweeterRun();
+  }
+  catch (e) {
+    console.log(e);
+  }
+}, 60000 * 1); // run every 1 minutes
