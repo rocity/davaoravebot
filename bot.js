@@ -4,7 +4,7 @@ var _ = require('underscore');
 var moment = require('moment');
 var Twit = require('twit');
 var async       = require('async');
-// require('dotenv').config();
+require('dotenv').config();
 
 var T = new Twit({
   consumer_key:         process.env.DRB_TWIT_CONSUMER_KEY,
@@ -71,6 +71,16 @@ var quote_array = [
   'Newest questions.'
 ]
 
+var tag_array = [
+  '#KadayawanInvasion',
+  '#Arcadia2016',
+]
+
+function select_tag() {
+  var sel_tag_index = _.random(0, (tag_array.length - 1));
+  return tag_array[sel_tag_index];
+}
+
 function select_quote() {
   quotefile_list = jsonfile.readFileSync(quotes);
 
@@ -82,7 +92,7 @@ function select_quote() {
 
   var sel_quote_index = _.random(0, (quote_list.length - 1));
 
-  return quote_list[sel_quote_index];
+  return quote_list[sel_quote_index] + ' #Kadayawan2016 ' + ' ' + select_tag() ;
 }
 
 function tweet_quote() {
@@ -97,9 +107,9 @@ function tweet_quote() {
     tweet_quote();
   } else {
     post_log('Selection success. Failed ' + failcount + ' times.', 2)
-    console.log(datex + " Q: " + sel_quote);
+    console.log(datex + " Qouting: " + sel_quote);
     if (datex === '2016-08-20') {
-      console.log("Attempting to tweet.");
+      console.log("Attempting to tweet. " + sel_quote);
       T.post('statuses/update', { status: sel_quote }, function(err, data, response) {
         post_log('Attempted tweet: ' + sel_quote + ' / Twitter Response: ' + JSON.stringify(data), 2)
         var newquote = {quote: sel_quote}
@@ -181,18 +191,18 @@ tweeter = function () {
 
 }
 
-// retweeter();
+retweeter();
 tweet_quote();
 
-// // set intervals
-// retweeterRun = function() {
-//   async.waterfall([
-//     retweeter
-//   ],
-//   function(err, botData) {
+// set intervals
+retweeterRun = function() {
+  async.waterfall([
+    retweeter
+  ],
+  function(err, botData) {
 
-//   });
-// };
+  });
+};
 
 tweeterRun = function() {
   async.waterfall([
