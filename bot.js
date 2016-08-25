@@ -3,9 +3,15 @@ var jsonfile = require('jsonfile');
 var _ = require('underscore');
 var moment = require('moment');
 var Twit = require('twit');
-var async       = require('async');
+var async = require('async');
+var querystring = require('querystring');
+var http = require('http');
+var fs = require('fs');
+
+// Environment variables using .env (Optimal for develop stage)
 require('dotenv').config();
 
+// Initialize Twit
 var T = new Twit({
   consumer_key:         process.env.DRB_TWIT_CONSUMER_KEY,
   consumer_secret:      process.env.DRB_JWUBOT_TWIT_CONSUMER_SECRET,
@@ -18,44 +24,7 @@ var hashtags = 'hashtags.json';
 var quotes = 'quotes.json';
 
 var timeformat = 'YYYY.MM.DD HH:mm:ss';
-
-var querystring = require('querystring');
-var http = require('http');
-var fs = require('fs');
-
-function post_log(logstring, type) {
-  return true;
-  console.log(logstring)
-  // Build the post string from an object
-  var post_data = querystring.stringify({
-      'logmsg' : logstring,
-      'type': type
-  });
-
-  // An object of options to indicate where to post to
-  var post_options = {
-      host: process.env.DRB_LOG_POST_HOST,
-      port: '80',
-      path: process.env.DRB_LOG_POST_FILE,
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Content-Length': Buffer.byteLength(post_data)
-      }
-  };
-
-  // Set up the request
-  var post_req = http.request(post_options, function(res) {
-      res.setEncoding('utf8');
-      res.on('data', function (chunk) {
-          // console.log('Response: ' + chunk);
-      });
-  });
-
-  // post the data
-  post_req.write(post_data);
-  post_req.end();
-}
+var generaltag = ' #Kadayawan2016 ';
 
 /*
 Send a Tweet
@@ -64,23 +33,18 @@ var failcount = 0;
 var last_quote = 'lq.json';
 var last_quote_stream = jsonfile.readFileSync(last_quote);
 
-var quote_array = [
-  'Hello world',
-  'Some non-creative quote',
-  'I have no idea.',
-  'Newest questions.'
-]
+var quote_array = [];
 
-var tag_array = [
-  '#KadayawanInvasion',
-  '#Arcadia2016',
-]
+var tag_array = [];
 
+// Select a random hashtag from the `tag_array` variable
 function select_tag() {
   var sel_tag_index = _.random(0, (tag_array.length - 1));
   return tag_array[sel_tag_index];
 }
 
+// Select a random quote from `quotes.json`. If it does not exist,
+// select_quote() will select from the variable `quote_array` instead
 function select_quote() {
   quotefile_list = jsonfile.readFileSync(quotes);
 
@@ -92,13 +56,14 @@ function select_quote() {
 
   var sel_quote_index = _.random(0, (quote_list.length - 1));
 
-  return quote_list[sel_quote_index] + ' #Kadayawan2016 ' + ' ' + select_tag() ;
+  return quote_list[sel_quote_index] + generaltag + select_tag() ;
 }
 
+// Send the selected quote to the Twitter API
 function tweet_quote() {
 
   var datex = moment().utcOffset('+0800').format('YYYY-MM-DD');
-  
+
   var sel_quote = select_quote();
   var lqstr = last_quote_stream.quote;
 
@@ -106,12 +71,8 @@ function tweet_quote() {
     failcount = failcount + 1;
     tweet_quote();
   } else {
-    post_log('Selection success. Failed ' + failcount + ' times.', 2)
-    console.log(datex + " Qouting: " + sel_quote);
     if (datex === '2016-08-20') {
-      console.log("Attempting to tweet. " + sel_quote);
       T.post('statuses/update', { status: sel_quote }, function(err, data, response) {
-        post_log('Attempted tweet: ' + sel_quote + ' / Twitter Response: ' + JSON.stringify(data), 2)
         var newquote = {quote: sel_quote}
         jsonfile.writeFileSync(last_quote, newquote)
       })
@@ -131,7 +92,6 @@ retweeter = function () {
   // get hashtag list
   hashtag_list = jsonfile.readFileSync(hashtags);
 
-  post_log('Started running retweeter()', 1);
   eachAsync(hashtag_list.hashtags, function(hashtag, index, done) {
     var q_tag = hashtag.tag,
         q_since = '',
@@ -147,7 +107,6 @@ retweeter = function () {
     var search_query = q_tag + ' since:' + q_since;
     T.get('search/tweets', { q: search_query, count: q_count }, function(err, data, response) {
 
-      post_log('Query: ' + q_tag, 1);
 
       if (data.statuses.length) {
 
@@ -166,25 +125,18 @@ retweeter = function () {
         if (typeof data.statuses[rand] !== 'undefined') {
           var selected_tweet = data.statuses[rand];
           T.post('statuses/retweet/:id', { id: selected_tweet.id_str }, function (err, data, response) {
-            post_log('Attempted retweet for ' + selected_tweet.id_str, 1);
-            post_log(selected_tweet.id_str + ' Response: ' +err, 1);
           });
         } else {
-          post_log('Selected an undefined tweet', 1);
         }
 
         done();
       } else {
         // there are no tweets yet.
-        post_log('No tweets for '+q_tag+' yet.', 1);
       }
     })
   }, error => {
-    console.log('Finished all processes.')
-    post_log('Finished all processes.', 1);
   })
 
-  post_log('End of retweeter()', 1);
 }
 
 tweeter = function () {
@@ -216,21 +168,17 @@ tweeterRun = function() {
 // Retweet tweets with hashtag x
 setInterval(function() {
   try {
-    console.log('Running retweeter at ' + moment().format());
     retweeterRun();
   }
   catch (e) {
-    console.log(e);
   }
 }, 60000 * 10); // run every 10 minutes
 
 // Tweet out random quotes
 setInterval(function() {
   try {
-    console.log('Running tweeter at ' + moment().format());
     tweeterRun();
   }
   catch (e) {
-    console.log(e);
   }
 }, 60000 * 30); // run every 1 minutes
