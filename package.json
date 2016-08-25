@@ -1,6 +1,7 @@
 {
   "name": "davaoravebot",
   "version": "0.0.1",
+  "repository": "https://github.com/rocity/davaoravebot.git",
   "description": "A bot for the Davao Rave events",
   "main": "bot.js",
   "scripts": {
